@@ -1,6 +1,10 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql");
 const removeItems = require("./removeItems.js");
+// List of options for operation
+const options = ["Purchase", "Exit"];
+// Cost of orders for this session
+var sessionCostTotal = 0.00;
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -16,78 +20,121 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
-// Call operations with completed connection
+////////////////////////////////////////////////
+// MAIN
+////////////////////////////////////////////////
 connection.connect(function (err) {
-    if (err) throw err;
+    if (err) return console.error(err);
 
+    displayCurrentInventory();
+});
+
+////////////////////////////////////////////////
+// DATABASE OPERATIONS
+////////////////////////////////////////////////
+
+// Call operations with completed connection
+function operationSelect() {
+    updateCostTotal();
+
+    inquirer.prompt([
+        {
+            type: "list",
+            name: "action",
+            message: "Select operation: ",
+            choices: options
+        }
+    ]).then(function (request) {
+        switch (request.action) {
+            case options[0]:
+                orderItem();
+                break;
+            default:
+                connection.end();
+                console.log("\nThank you for using Bamazon!\n");
+                break;
+        }
+    });
+}
+
+function orderItem() {
+    var targetData;
+
+    inquirer.prompt([
+        {
+            type: "number",
+            name: "id",
+            message: "Input the ID number of your desired item. You can omit leading zeroes: "
+        },
+        {
+            type: "number",
+            name: "quantity",
+            message: "How many do you want to order? "
+        }
+    ]).then(function (order) {
+        // Find the requested item and build a data object for reference
+        var query = `SELECT * FROM products WHERE item_id = ${order.id};`;
+
+        connection.query(query, function (err, response) {
+            if (err) return console.log(err);
+            // Adds some validation prior to asynchronous assignment
+            var targetItem = response[0];
+
+            targetData = new data(
+                targetItem.product_name,
+                targetItem.department_name,
+                targetItem.price,
+                targetItem.stock_quantity
+            );
+
+            if (removeItems(connection, targetData, order)) {
+                sessionCostTotal += parseFloat(targetData.price) * parseFloat(order.quantity);
+                console.log("Order confirmed.");
+            }
+            else console.log("Your order could not be completed.");
+
+            displayCurrentInventory()
+        });
+    });
+}
+
+function displayCurrentInventory() {
     var query = "SELECT * FROM products;";
 
     connection.query(query, function (err, response) {
         if (err) return console.log(err);
 
-        displayCurrentInventory(response);
-        orderItem(response);
+        var inventory = {};
+
+        for (let i = 0; i < response.length; i++) {
+            var tempData = new data(
+                response[i].product_name,
+                response[i].department_name,
+                response[i].price,
+                response[i].stock_quantity
+            );
+            inventory[response[i].item_id] = tempData;
+        }
+        console.table(inventory, ["product", "department", "priceDollar", "stock"]);
+
+        operationSelect();
     });
-
-    connection.end();
-});
-
-function displayCurrentInventory(response) {
-    var inventory = {};
-
-    for (let i = 0; i < response.length; i++) {
-        var tempData = new data(
-            response[i].product_name,
-            response[i].department_name,
-            response[i].price,
-            response[i].stock_quantity
-        );
-
-        inventory[response[i].item_id] = tempData;
-    }
-    console.table(inventory);
-}
-
-function orderItem(response) {
-    inquirer
-        .prompt([
-            {
-                type: "number",
-                name: "id",
-                message: "Input the ID number of your desired item. You can omit leading zeroes."
-            },
-            {
-                type: "number",
-                name: "quantity",
-                message: "How many do you want to order?"
-            }
-        ]).then(function (order) {
-            // Find the requested item and build a data object for reference
-            var targetData;
-            var indexCount = 0;
-            var targetIndexFound = false;
-
-            while (!targetIndexFound) {
-                if (parseInt(response[indexCount].item_id) === order.id) {
-                    targetData = new data(
-                        response[indexCount].product_name,
-                        response[indexCount].department_name,
-                        response[indexCount].price,
-                        response[indexCount].stock_quantity
-                    );
-
-                    targetIndexFound = true;
-                    removeItems(targetData, order);
-                }
-                else { indexCount++; }
-            }
-        });
 }
 
 // Organize item properties for display reference
 function data(product, department, price, stock) {
     this.product = product;
     this.department = department;
-    this.price = "$" + price.toFixed(2);
+    this.price = price;
+    this.priceDollar = "$" + price.toFixed(2);
     this.stock = stock;
 };
+
+////////////////////////////////////////////////
+// SUB-FUNCTIONALITY
+// (note: good band or album name)
+////////////////////////////////////////////////
+
+function updateCostTotal() {
+    console.log("Total purchases: $" + sessionCostTotal.toFixed(2) + "\n");
+}
