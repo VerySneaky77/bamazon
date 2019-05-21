@@ -1,8 +1,10 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql");
-const removeItems = require("./removeItems.js");
+const removeItems = require("./updateInventory.js");
 // List of options for operation
 const options = ["Purchase", "Exit"];
+// Filtered data columns for built data objects
+const inventoryTargetInfo = ["product", "department", "priceDollar", "stock"];
 // Cost of orders for this session
 var sessionCostTotal = 0.00;
 
@@ -23,6 +25,7 @@ var connection = mysql.createConnection({
 ////////////////////////////////////////////////
 // MAIN
 ////////////////////////////////////////////////
+
 connection.connect(function (err) {
     if (err) return console.error(err);
 
@@ -77,7 +80,6 @@ function orderItem() {
 
         connection.query(query, function (err, response) {
             if (err) return console.log(err);
-            // Adds some validation prior to asynchronous assignment
             var targetItem = response[0];
 
             targetData = new data(
@@ -86,9 +88,12 @@ function orderItem() {
                 targetItem.price,
                 targetItem.stock_quantity
             );
+            // Change sign of quantity to execute proper subtraction
+            order.quantity = order.quantity * (-1);
 
             if (removeItems(connection, targetData, order)) {
-                sessionCostTotal += parseFloat(targetData.price) * parseFloat(order.quantity);
+                // Update cost total
+                sessionCostTotal += parseFloat(targetData.price) * Math.abs(parseFloat(order.quantity));
                 console.log("Order confirmed.");
             }
             else console.log("Your order could not be completed.");
@@ -115,13 +120,13 @@ function displayCurrentInventory() {
             );
             inventory[response[i].item_id] = tempData;
         }
-        console.table(inventory, ["product", "department", "priceDollar", "stock"]);
+        console.table(inventory, inventoryTargetInfo);
 
         operationSelect();
     });
 }
 
-// Organize item properties for display reference
+// Organize item properties
 function data(product, department, price, stock) {
     this.product = product;
     this.department = department;
