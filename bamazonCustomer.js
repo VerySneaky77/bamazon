@@ -1,12 +1,20 @@
+////////////////////////////////////////////////
+// GLOBAL ACCESS
+////////////////////////////////////////////////
+
 const inquirer = require("inquirer");
 const mysql = require("mysql");
-const removeItems = require("./updateInventory.js");
+const inventoryControl = require("./inventoryControl.js");
+const updateItems = inventoryControl.updateInventory;
+const displayItems = inventoryControl.displayCurrentInventory;
 // List of options for operation
 const options = ["Purchase", "Exit"];
-// Filtered data columns for built data objects
-const inventoryTargetInfo = ["product", "department", "priceDollar", "stock"];
 // Cost of orders for this session
 var sessionCostTotal = 0.00;
+
+////////////////////////////////////////////////
+// DATABASE CONNECTION
+////////////////////////////////////////////////
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -29,7 +37,7 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) return console.error(err);
 
-    displayCurrentInventory();
+    startup();
 });
 
 ////////////////////////////////////////////////
@@ -37,6 +45,10 @@ connection.connect(function (err) {
 ////////////////////////////////////////////////
 
 // Call operations with completed connection
+function startup() {
+    displayItems(connection, operationSelect);
+}
+
 function operationSelect() {
     updateCostTotal();
 
@@ -60,9 +72,8 @@ function operationSelect() {
     });
 }
 
+// Makes an order
 function orderItem() {
-    var targetData;
-
     inquirer.prompt([
         {
             type: "number",
@@ -80,60 +91,20 @@ function orderItem() {
 
         connection.query(query, function (err, response) {
             if (err) return console.log(err);
-            var targetItem = response[0];
-
-            targetData = new data(
-                targetItem.product_name,
-                targetItem.department_name,
-                targetItem.price,
-                targetItem.stock_quantity
-            );
             // Change sign of quantity to execute proper subtraction
             order.quantity = order.quantity * (-1);
 
-            if (removeItems(connection, targetData, order)) {
+            if (updateItems(connection, response[0], order)) {
                 // Update cost total
-                sessionCostTotal += parseFloat(targetData.price) * Math.abs(parseFloat(order.quantity));
+                sessionCostTotal += parseFloat(response[0].price) * Math.abs(parseFloat(order.quantity));
                 console.log("Order confirmed.");
             }
             else console.log("Your order could not be completed.");
 
-            displayCurrentInventory()
+            displayItems(connection, operationSelect);
         });
     });
 }
-
-function displayCurrentInventory() {
-    var query = "SELECT * FROM products;";
-
-    connection.query(query, function (err, response) {
-        if (err) return console.log(err);
-
-        var inventory = {};
-
-        for (let i = 0; i < response.length; i++) {
-            var tempData = new data(
-                response[i].product_name,
-                response[i].department_name,
-                response[i].price,
-                response[i].stock_quantity
-            );
-            inventory[response[i].item_id] = tempData;
-        }
-        console.table(inventory, inventoryTargetInfo);
-
-        operationSelect();
-    });
-}
-
-// Organize item properties
-function data(product, department, price, stock) {
-    this.product = product;
-    this.department = department;
-    this.price = price;
-    this.priceDollar = "$" + price.toFixed(2);
-    this.stock = stock;
-};
 
 ////////////////////////////////////////////////
 // SUB-FUNCTIONALITY
