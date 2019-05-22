@@ -46,7 +46,7 @@ connection.connect(function (err) {
 
 // Call operations with completed connection
 function startup() {
-    displayItems(connection, `"SELECT * FROM products;"`, operationSelect);
+    displayItems(connection, "SELECT * FROM products;", operationSelect);
 }
 
 function operationSelect() {
@@ -101,7 +101,7 @@ function orderItem() {
             }
             else console.log("Your order could not be completed.");
 
-            displayItems(connection, `"SELECT * FROM products;"`, operationSelect);
+            displayItems(connection, "SELECT * FROM products;", operationSelect);
         });
     });
 }

@@ -9,6 +9,7 @@ bamazonCustomer.js is designed for end-users who are customers of bamazon. The a
 * **Exit:** Closes the app.
 
 ### Showcase: Consumer App
+Video showcase: https://drive.google.com/file/d/1rwMNpaxnI8E-GKYgkf-EVYdvMPF15_YQ/view?usp=sharing
 
 ### About: Manager App
 bamazonManager.js is designed for bamazon supply chain management end-users. The app allows users to conduct the following actions regarding the database of products:
@@ -16,3 +17,6 @@ bamazonManager.js is designed for bamazon supply chain management end-users. The
 * **View Low Inventory:** Log all available products below a minimum quantity threshold. Minimum is set to five.
 * **Add to Inventory:** Adjust the available stock quantity of an item. User will be prompted to select an item by its ID, followed by the amount to adjust the quantity. This function is meant to add to stock, but can be used to deplete it should the user deem it necessary. Database is updated upon completion of entries.
 * **Add New Product:** Adds a new product listing to the product database. User will be prompted for required product information. Database is updated upon completion of entries.
+
+### Showcase: Manager App
+Video showcase: https://drive.google.com/file/d/1zgKZ983273MdyRc_uc2x5N2QWHXmCcYo/view?usp=sharing
