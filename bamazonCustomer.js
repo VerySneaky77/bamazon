@@ -6,7 +6,7 @@ const inquirer = require("inquirer");
 const mysql = require("mysql");
 const inventoryControl = require("./inventoryControl.js");
 const updateItems = inventoryControl.updateInventory;
-const displayItems = inventoryControl.displayCurrentInventory;
+const displayItems = inventoryControl.displayInventory;
 // List of options for operation
 const options = ["Purchase", "Exit"];
 // Cost of orders for this session
@@ -46,7 +46,7 @@ connection.connect(function (err) {
 
 // Call operations with completed connection
 function startup() {
-    displayItems(connection, operationSelect);
+    displayItems(connection, `"SELECT * FROM products;"`, operationSelect);
 }
 
 function operationSelect() {
@@ -86,7 +86,7 @@ function orderItem() {
             message: "How many do you want to order? "
         }
     ]).then(function (order) {
-        // Find the requested item and build a data object for reference
+        // Find the requested item
         var query = `SELECT * FROM products WHERE item_id = ${order.id};`;
 
         connection.query(query, function (err, response) {
@@ -101,7 +101,7 @@ function orderItem() {
             }
             else console.log("Your order could not be completed.");
 
-            displayItems(connection, operationSelect);
+            displayItems(connection, `"SELECT * FROM products;"`, operationSelect);
         });
     });
 }

@@ -1,9 +1,7 @@
 // Properties to display for the inventory
 const inventoryTargetInfo = ["product","department","priceDollars","stock"];
 
-module.exports.displayCurrentInventory = function (connection, nextStep) {
-    var query = "SELECT * FROM products;";
-
+module.exports.displayInventory = function (connection, query, nextStep) {
     connection.query(query, function (err, response) {
         if (err) return console.log(err);
 
