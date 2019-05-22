@@ -9,7 +9,7 @@ bamazonCustomer.js is designed for end-users who are customers of bamazon. The a
 * **Exit:** Closes the app.
 
 ### Showcase: Consumer App
-Video showcase: https://drive.google.com/file/d/1rwMNpaxnI8E-GKYgkf-EVYdvMPF15_YQ/view?usp=sharing
+[Consumer app showcase](https://drive.google.com/file/d/1rwMNpaxnI8E-GKYgkf-EVYdvMPF15_YQ/view?usp=sharing)
 
 ### About: Manager App
 bamazonManager.js is designed for bamazon supply chain management end-users. The app allows users to conduct the following actions regarding the database of products:
@@ -19,4 +19,4 @@ bamazonManager.js is designed for bamazon supply chain management end-users. The
 * **Add New Product:** Adds a new product listing to the product database. User will be prompted for required product information. Database is updated upon completion of entries.
 
 ### Showcase: Manager App
-Video showcase: https://drive.google.com/file/d/1zgKZ983273MdyRc_uc2x5N2QWHXmCcYo/view?usp=sharing
+[Manager app showcase](https://drive.google.com/file/d/1zgKZ983273MdyRc_uc2x5N2QWHXmCcYo/view?usp=sharing)
