@@ -1,5 +1,5 @@
 // Properties to display for the inventory
-const inventoryTargetInfo = ["product","department","priceDollars","stock"];
+const inventoryTargetInfo = ["product","department","price","stock"];
 
 module.exports.displayInventory = function (connection, query, nextStep) {
     connection.query(query, function (err, response) {
@@ -60,7 +60,7 @@ function quantityCheck(available, requested) {
 function itemData (product, department, price, stock) {
     this.product = product;
     this.department = department;
-    this.price = price;
-    this.priceDollars = "$" + price.toFixed(2);
+    this.priceNumber = price;
+    this.price = "$" + price.toFixed(2);
     this.stock = stock;
 };

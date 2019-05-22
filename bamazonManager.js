@@ -44,7 +44,6 @@ connection.connect(function (err) {
 // DATABASE OPERATIONS
 ////////////////////////////////////////////////
 
-// Call operations with completed connection
 function operationSelect() {
     inquirer.prompt([
         {
@@ -65,7 +64,7 @@ function operationSelect() {
                 addInventory();
                 break;
             case options[3]:
-
+                addNewItem();
                 break;
             default:
                 connection.end();
@@ -94,12 +93,47 @@ function addInventory() {
         connection.query(query, function (err, response) {
             if (err) return console.log(err);
 
-            if(updateItems(connection, response[0], order)) {
+            if (updateItems(connection, response[0], order)) {
                 // Update cost total
                 console.log(`Inventory updated for ${response[0].product_name}.`);
             }
             else console.log("Unable to update inventory.");
 
+            operationSelect();
+        });
+    });
+}
+
+function addNewItem() {
+    inquirer.prompt([
+        {
+            type: "text",
+            name: "product",
+            message: "Enter product name/description:  "
+        },
+        {
+            type: "text",
+            name: "department",
+            message: "Enter department to manage product: "
+        },
+        {
+            type: "number",
+            name: "price",
+            message: "Enter product selling price: "
+        },
+        {
+            type: "number",
+            name: "stock",
+            message: "Enter initial stock to inventory: "
+        }
+    ]).then(function (productData) {
+        var query = `INSERT INTO products(product_name, department_name, price, stock_quantity)
+        VALUES("${productData.product}", "${productData.department}", ${productData.price}, ${productData.stock});`;
+
+        connection.query(query, function (err, response) {
+            if (err) return console.error(err);
+
+            console.log("New product added.");
             operationSelect();
         });
     });
